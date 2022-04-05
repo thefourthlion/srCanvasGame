@@ -442,10 +442,12 @@ let rains;
 let raining = true;
 let snowing = true;
 let sunny = true;
+let dayTime = true;
 
 function rain() {
   if (raining == true) {
     console.log("rain got called");
+
     function init() {
       rains = [];
       for (let i = 0; i < 500; i++) {
@@ -602,7 +604,7 @@ function weather() {
     rain();
 
     rain = true;
-    // snow = false;
+    snow = false;
     sunny = false;
   } else if (
     chance > rainChance &&
@@ -642,7 +644,7 @@ function weather() {
     );
 
     sunny = true;
-    // snow = false;
+    snow = false;
     rain = false;
   }
 }
@@ -703,6 +705,13 @@ function loadEverything() {
       currentMinute = date.getUTCMinutes();
     }
 
+    //set daytime variable
+    if (currentHour < 19 && currentHour > 7) {
+      dayTime = true;
+    } else {
+      dayTime = false;
+    }
+
     // if (currentSecond % 3 == 0 && milliseconds <= 16.6) {
     //   if (currentSecond > 40 && currentSecond < 43) {
     //     weatherCalled = false;
@@ -740,6 +749,24 @@ function loadEverything() {
 
   requestAnimationFrame(loadEverything);
 }
+
+//sky color
+function defaultSky() {
+  if (dayTime === true && rain === true) {
+    canvas.style.background = "linear-gradient(#9BB9B8, #1F6064)";
+  } else if (dayTime !== true && rain === true) {
+    canvas.style.background = "linear-gradient(#272026, #000000)";
+  } else if (dayTime === true && snow === true) {
+    canvas.style.background = "linear-gradient(#CCFFFD, #31C4BF)";
+  } else if (dayTime !== true && snow === true) {
+    canvas.style.background = "linear-gradient(#320D3E, #100411)";
+  } else if (dayTime === true && sunny === true) {
+    canvas.style.background = "linear-gradient(#D3FFFF, #56E7E7)";
+  } else if (dayTime !== true && sunny === true) {
+    canvas.style.background = "linear-gradient(#320D3E, #100411)";
+  }
+}
+defaultSky();
 
 function newPos() {
   player.x += player.dx;
