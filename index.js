@@ -12,7 +12,7 @@ const Countries = [
   {
     name: "Yellowknife",
     country: "Canada",
-    time: -7,
+    time: -6,
     daylightSavings: 1,
     rain: 119,
     snow: 78,
@@ -50,7 +50,7 @@ const Countries = [
   {
     name: "Denver",
     country: "USA",
-    time: -7,
+    time: -6,
     daylightSavings: 1,
     rain: 84,
     snow: 31,
@@ -68,16 +68,16 @@ const Countries = [
   {
     name: "New York",
     country: "USA",
-    time: -5,
+    time: -4,
     daylightSavings: 1,
     rain: 125,
     snow: 11,
     sun: 107,
   },
   {
-    name: "Alaska",
+    name: "Anchorage",
     country: "USA",
-    time: -9,
+    time: -8,
     daylightSavings: 1,
     rain: 115,
     snow: 47,
@@ -88,7 +88,7 @@ const Countries = [
   {
     name: "Mexico City",
     country: "Mexico",
-    time: -6,
+    time: -5,
     daylightSavings: 1,
     rain: 64,
     snow: 0,
@@ -230,7 +230,7 @@ const Countries = [
   {
     name: "London",
     country: "United Kingdom",
-    time: +2,
+    time: +1,
     daylightSavings: 1,
     rain: 110,
     snow: 16,
@@ -239,7 +239,7 @@ const Countries = [
   {
     name: "Cambridge",
     country: "United Kingdom",
-    time: +0,
+    time: +1,
     daylightSavings: 1,
     rain: 108,
     snow: 2,
@@ -404,30 +404,7 @@ const Countries = [
   },
 ];
 
-const player = {
-  w: 75,
-  h: 75,
-  x: Math.floor(Math.random() * 245) + 1,
-  y: 280,
-  speed: 1,
-  dx: 0,
-  dy: 0,
-};
-
-const bed = {
-  w: 150,
-  h: 180,
-  x: 0,
-  y: 180,
-};
-
-const food = {
-  w: 150,
-  h: 180,
-  x: 450,
-  y: 180,
-};
-
+//VARIABLES
 const canvas = document.getElementById("Canvas");
 const ctx = canvas.getContext("2d");
 canvas.width = 600;
@@ -437,15 +414,81 @@ h = 360;
 const playerImage = document.querySelector(".player");
 const bedImage = document.querySelector(".bed");
 const foodImage = document.querySelector(".food");
-let nftName = "Yellowknife";
+let nftName = "Sydney";
 let weatherCalled = false;
 let snows;
 let rains;
 let raining = true;
 let snowing = true;
 let sunny = true;
-let dayTime = true;
+let dayTime = false;
+let morning = false;
+let evening = false;
+let nightTime = false;
 
+//OBJECTS
+const player = {
+  w: 178,
+  h: 196,
+  x: Math.floor(Math.random() * 245) + 1,
+  y: 150,
+  speed: 1,
+  dx: 0,
+  dy: 0,
+};
+
+const bed = {
+  w: 194,
+  h: 125,
+  x: 0,
+  y: 220,
+};
+
+const food = {
+  w: 187,
+  h: 125,
+  x: 413,
+  y: 220,
+};
+
+//DRAW FUNCTIONS
+function drawPlayer() {
+  ctx.drawImage(playerImage, player.x, player.y, player.w, player.h);
+}
+
+function drawBed() {
+  ctx.drawImage(bedImage, bed.x, bed.y, bed.w, bed.h);
+}
+
+function drawFood() {
+  ctx.drawImage(foodImage, food.x, food.y, food.w, food.h);
+}
+
+//OPERATIONS
+const index = Countries.findIndex((object) => {
+  return object.name === nftName;
+});
+
+    //create random numbers
+const ranNums = {
+  eat: Math.floor(Math.random() * 60) + 1,
+  sleep: Math.floor(Math.random() * 60) + 1,
+};
+
+    //clear function
+function clear() {
+  ctx.clearRect(0, 80, 300, 70);
+  ctx.clearRect(0, 0, 300, 15);
+  ctx.clearRect(0, 0, 600, 360);
+  ctx.beginPath();
+  ctx.stroke();
+  ctx.fillStyle = "black";
+  ctx.fill();
+  ctx.closePath();
+}
+
+
+//WEATHER
 function rain() {
   if (raining == true) {
     console.log("rain got called");
@@ -510,13 +553,12 @@ function rain() {
   window.addEventListener("DOMContentLoaded", init);
 }
 
-// snow();
 function snow() {
   if (snowing == true) {
     console.log("snow got called");
     function init() {
       snows = [];
-      for (let i = 0; i < 500; i++) {
+      for (let i = 0; i < 200; i++) {
         snows.push(new Snow());
       }
       animationLoop();
@@ -548,7 +590,7 @@ function snow() {
         this.xc = (this.x - w / 2) / (w / 2) / 2;
         this.y = getRandomInt(-(h * 0.3), h);
         this.yc = getRandomInt(10, 15) / 10;
-        this.size = getRandomInt(5, 11) / 10;
+        this.size = getRandomInt(5, 11) / 4;
         this.a = getRandomInt(-5, 0) / 10;
         this.ac = getRandomInt(1, 3) / 100;
       }
@@ -575,36 +617,13 @@ function snow() {
   window.addEventListener("DOMContentLoaded", init);
 }
 
-const index = Countries.findIndex((object) => {
-  return object.name === nftName;
-});
-
-// create random numbers
-const ranNums = {
-  eat: Math.floor(Math.random() * 60) + 1,
-  sleep: Math.floor(Math.random() * 60) + 1,
-};
-// clear function
-function clear() {
-  ctx.clearRect(0, 80, 300, 70);
-  ctx.clearRect(0, 0, 300, 15);
-  ctx.clearRect(0, 0, 600, 360);
-  ctx.beginPath();
-  ctx.stroke();
-  ctx.fillStyle = "black";
-  ctx.fill();
-  ctx.closePath();
-}
-
 function weather() {
   let chance = Math.floor(Math.random() * 365) + 1;
   let rainChance = Countries[index].rain - Countries[index].snow;
   if (chance < rainChance) {
-    // snow();
     console.log(chance + " < " + rainChance);
     console.log("Raining");
     rain();
-
     rain = true;
     snow = false;
     sunny = false;
@@ -612,7 +631,6 @@ function weather() {
     chance > rainChance &&
     chance < rainChance + Countries[index].snow
   ) {
-    // snow();
     console.log(
       chance +
         " > " +
@@ -625,9 +643,7 @@ function weather() {
     );
     console.log("Snowing");
     snow();
-
     snowing = true;
-
     sunny = false;
     raining = false;
   } else if (
@@ -644,22 +660,12 @@ function weather() {
         " > " +
         (rainChance + Countries[index].snow)
     );
-
     sunny = true;
     snowing = false;
     raining = false;
   }
 }
 
-// function weather() {
-//   rain();
-// }
-// name: "Perth",
-// country: "Australia",
-// time: +8,
-// daylightSavings: 1,rain: 79,
-// snow: 5,
-// sun: 321.2,
 weather();
 
 // if (raining == true) {
@@ -676,25 +682,22 @@ weather();
 
 //   snow();
 // }
-// draw functions
-
-function drawPlayer() {
-  ctx.drawImage(playerImage, player.x, player.y, player.w, player.h);
-}
-
-function drawBed() {
-  ctx.drawImage(bedImage, bed.x, bed.y, bed.w, bed.h);
-}
-
-function drawFood() {
-  ctx.drawImage(foodImage, food.x, food.y, food.w, food.h);
-}
 
 // game related functions
 function loadEverything() {
   function time() {
     let date = new Date();
+    let utcHours = date.getUTCHours();
     let currentHour = date.getUTCHours() + Countries[index].time;
+
+    //without adding 24 hours to the hour it shows negatives after 24
+    let displayHour = currentHour;
+    // if (utcHours >= 1 && utcHours <= 12 && Countries[index].time < 0) {
+    //   displayHour = currentHour;
+    // } else if (utcHours <= 1 && utcHours >= 12 && Countries[index].time < 0) {
+    //   displayHour = currentHour;
+    // }
+    
     let currentMinute = 0;
     let currentSecond = date.getUTCSeconds();
     let milliseconds = date.getUTCMilliseconds();
@@ -708,11 +711,57 @@ function loadEverything() {
     }
 
     //set daytime variable
-    if (currentHour < 19 && currentHour > 7) {
-      dayTime = true;
-    } else {
+    // if (currentHour < 19 && currentHour > 7) {
+    //   dayTime = true;
+    // } else {
+    //   dayTime = false;
+    // }
+
+    if (currentHour > 6 && currentHour < 8) {
+      morning = true;
       dayTime = false;
+      evening = false;
+      nightTime = false;
+    } else if (currentHour >= 8 && currentHour < 18) {
+      morning = false;
+      dayTime = true;
+      evening = false;
+      nightTime = false;
+    } else if (currentHour >= 18 && currentHour < 19) {
+      morning = false;
+      dayTime = false;
+      evening = true;
+      nightTime = false;
+    } else {
+      morning = false;
+      dayTime = false;
+      evening = false;
+      nightTime = true;
     }
+
+        //adds a zero to the minute if below 10
+        let time = "";
+        if (currentMinute < 10 && currentSecond >= 10) {
+          time = currentHour + ":0" + currentMinute + ":" + currentSecond;
+        } else if (currentMinute < 10 && currentSecond < 10) {
+          time = currentHour + ":0" + currentMinute + ":0" + currentSecond;
+        } else if (currentMinute >= 10 && currentSecond < 10) {
+          time = currentHour + ":" + currentMinute + ":0" + currentSecond;
+        } else {
+          time = currentHour + ":" + currentMinute + ":" + currentSecond;
+        }
+        
+        //text color based on day or night time
+        if (dayTime === true) {
+          ctx.fillStyle = "black";
+        } else {
+          ctx.fillStyle = "white";
+        }
+    
+        ctx.font = "20px Verdana";
+        ctx.fillText(time, (canvas.width / 2) - 50 , 25);
+        // for testing
+        ctx.fillText("player x: " + player.x, 10, 25);
 
     // if (currentSecond % 3 == 0 && milliseconds <= 16.6) {
     //   if (currentSecond > 40 && currentSecond < 43) {
@@ -727,12 +776,55 @@ function loadEverything() {
     //     weather();
     //   }
     // }
-    let time = currentHour + ":" + currentMinute + ":" + currentSecond;
-    ctx.font = "20px Verdana";
-    ctx.fillText(time, canvas.width / 2 - 15, 25);
-    // for testing
-    ctx.fillText("player x: " + player.x, 10, 25);
   }
+
+//sky color
+function defaultSky() {
+  if (morning === true && raining === true) {
+    canvas.style.background = "linear-gradient(#9BB9B8, #1F6064)";
+  } else if (dayTime === true && raining === true) {
+    canvas.style.background = "linear-gradient(#9BB9B8, #3F8F93)";
+  } else if (evening === true && raining === true) {
+    canvas.style.background = "linear-gradient(#9BB9B8, #1F6064)";
+  } else if (nightTime === true && raining === true) {
+    canvas.style.background = "linear-gradient(#0D0627, #000000)";
+  } 
+  else if (morning === true && snowing === true) {
+    canvas.style.background = "linear-gradient(#31C4BF, #DAF8C3)";
+  } else if (dayTime === true && snowing === true) {
+    canvas.style.background = "linear-gradient(#CCFFFD, #31C4BF)";
+  } else if (evening === true && snowing === true) {
+    canvas.style.background = "linear-gradient(#DAF8C3, #31C4BF)";
+  } else if (nightTime === true && snowing === true) {
+    canvas.style.background = "linear-gradient(#0D0627, #000000)";
+  } 
+  else if (morning === true && sunny === true) {
+    canvas.style.background = "linear-gradient(#D3FFFF, #E8AE56)";
+  } else if (dayTime === true && sunny === true) {
+    canvas.style.background = "linear-gradient(#D3FFFF, #56E7E7)";
+  } else if (evening === true && sunny === true) {
+    canvas.style.background = "linear-gradient(#E8AE56, #D3FFFF)";
+  } else if (nightTime === true && sunny === true) {
+    canvas.style.background = "linear-gradient(#0D0627, #000000)";
+  } 
+}
+
+// function defaultSky() {
+//   if (dayTime === true && raining === true) {
+//     canvas.style.background = "linear-gradient(#9BB9B8, #1F6064)";
+//   } else if (dayTime === false && raining === true) {
+//     canvas.style.background = "linear-gradient(#0D0627, #000000)";
+//   } else if (dayTime === true && snowing === true) {
+//     canvas.style.background = "linear-gradient(#CCFFFD, #31C4BF)";
+//   } else if (dayTime === false && snowing === true) {
+//     canvas.style.background = "linear-gradient(#0D0627, #000000)";
+//   } else if (dayTime === true && sunny === true) {
+//     canvas.style.background = "linear-gradient(#D3FFFF, #56E7E7)";
+//   } else if (dayTime === false && sunny === true) {
+//     canvas.style.background = "linear-gradient(#0D0627, #000000)";
+//   }
+// }
+  defaultSky();
 
   // drawScene();
   time();
@@ -753,24 +845,6 @@ function loadEverything() {
   requestAnimationFrame(loadEverything);
 }
 
-//sky color
-function defaultSky() {
-  if (dayTime === true && raining === true) {
-    canvas.style.background = "linear-gradient(#9BB9B8, #1F6064)";
-  } else if (dayTime !== true && raining === true) {
-    canvas.style.background = "linear-gradient(#272026, #000000)";
-  } else if (dayTime === true && snowing === true) {
-    canvas.style.background = "linear-gradient(#CCFFFD, #31C4BF)";
-  } else if (dayTime !== true && snowing === true) {
-    canvas.style.background = "linear-gradient(#320D3E, #100411)";
-  } else if (dayTime === true && sunny === true) {
-    canvas.style.background = "linear-gradient(#D3FFFF, #56E7E7)";
-  } else if (dayTime !== true && sunny === true) {
-    canvas.style.background = "linear-gradient(#320D3E, #100411)";
-  }
-}
-defaultSky();
-
 function newPos() {
   player.x += player.dx;
   detectWalls();
@@ -785,8 +859,8 @@ function waitForHunger() {
     // console.log("will be hungry at " + ranNums.eat + " seconds.");
     if (currentSecond === ranNums.eat) {
       console.log("I'm hungry");
-      ctx.clearRect(0, 15, 300, 15);
-      ctx.fillText("I'm Hungry ", 25, 25);
+      ctx.clearRect(0, 100, 300, 15);
+      ctx.fillText("I'm Hungry ", 25, 100);
     }
   }
 }
@@ -799,7 +873,7 @@ function sleepBtn() {
 
 // collision detection
 function bedCollision() {
-  if (player.x > -1 && player.x <= 150) {
+  if (player.x > -1 && player.x <= 194) {
     ctx.beginPath();
     ctx.fillText("Bed!!!", 10, 160);
     ctx.stroke();
@@ -807,7 +881,7 @@ function bedCollision() {
 }
 
 function foodCollision() {
-  if (player.x > 375 && player.x <= 600) {
+  if (player.x > 413 - player.w && player.x <= 600) {
     ctx.beginPath();
     ctx.fillText("Food!!!", 500, 160);
     ctx.stroke();
