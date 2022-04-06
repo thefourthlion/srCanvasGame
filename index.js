@@ -405,31 +405,33 @@ const Countries = [
 ];
 
 const player = {
-  w: 25,
-  h: 25,
+  w: 75,
+  h: 75,
   x: Math.floor(Math.random() * 245) + 1,
-  y: 123,
+  y: 280,
   speed: 1,
   dx: 0,
   dy: 0,
 };
 
 const bed = {
-  w: 50,
-  h: 60,
-  x: 5,
-  y: 90,
+  w: 150,
+  h: 180,
+  x: 0,
+  y: 180,
 };
 
 const food = {
-  w: 50,
-  h: 60,
-  x: 245,
-  y: 90,
+  w: 150,
+  h: 180,
+  x: 450,
+  y: 180,
 };
 
 const canvas = document.getElementById("Canvas");
 const ctx = canvas.getContext("2d");
+canvas.width = 600;
+canvas.height = 360;
 w = 600;
 h = 360;
 const playerImage = document.querySelector(".player");
@@ -442,10 +444,12 @@ let rains;
 let raining = true;
 let snowing = true;
 let sunny = true;
+let dayTime = true;
 
 function rain() {
   if (raining == true) {
     console.log("rain got called");
+
     function init() {
       rains = [];
       for (let i = 0; i < 500; i++) {
@@ -602,7 +606,7 @@ function weather() {
     rain();
 
     rain = true;
-    // snow = false;
+    snow = false;
     sunny = false;
   } else if (
     chance > rainChance &&
@@ -622,10 +626,10 @@ function weather() {
     console.log("Snowing");
     snow();
 
-    snow = true;
+    snowing = true;
 
     sunny = false;
-    rain = false;
+    raining = false;
   } else if (
     chance > rainChance &&
     chance > rainChance + Countries[index].snow
@@ -642,8 +646,8 @@ function weather() {
     );
 
     sunny = true;
-    // snow = false;
-    rain = false;
+    snowing = false;
+    raining = false;
   }
 }
 
@@ -703,6 +707,13 @@ function loadEverything() {
       currentMinute = date.getUTCMinutes();
     }
 
+    //set daytime variable
+    if (currentHour < 19 && currentHour > 7) {
+      dayTime = true;
+    } else {
+      dayTime = false;
+    }
+
     // if (currentSecond % 3 == 0 && milliseconds <= 16.6) {
     //   if (currentSecond > 40 && currentSecond < 43) {
     //     weatherCalled = false;
@@ -717,9 +728,10 @@ function loadEverything() {
     //   }
     // }
     let time = currentHour + ":" + currentMinute + ":" + currentSecond;
-    ctx.fillText(time, canvas.width / 2 - 15, 10);
+    ctx.font = "20px Verdana";
+    ctx.fillText(time, canvas.width / 2 - 15, 25);
     // for testing
-    ctx.fillText("player x: " + player.x, 10, 10);
+    ctx.fillText("player x: " + player.x, 10, 25);
   }
 
   // drawScene();
@@ -740,6 +752,24 @@ function loadEverything() {
 
   requestAnimationFrame(loadEverything);
 }
+
+//sky color
+function defaultSky() {
+  if (dayTime === true && raining === true) {
+    canvas.style.background = "linear-gradient(#9BB9B8, #1F6064)";
+  } else if (dayTime !== true && raining === true) {
+    canvas.style.background = "linear-gradient(#272026, #000000)";
+  } else if (dayTime === true && snowing === true) {
+    canvas.style.background = "linear-gradient(#CCFFFD, #31C4BF)";
+  } else if (dayTime !== true && snowing === true) {
+    canvas.style.background = "linear-gradient(#320D3E, #100411)";
+  } else if (dayTime === true && sunny === true) {
+    canvas.style.background = "linear-gradient(#D3FFFF, #56E7E7)";
+  } else if (dayTime !== true && sunny === true) {
+    canvas.style.background = "linear-gradient(#320D3E, #100411)";
+  }
+}
+defaultSky();
 
 function newPos() {
   player.x += player.dx;
@@ -769,17 +799,17 @@ function sleepBtn() {
 
 // collision detection
 function bedCollision() {
-  if (player.x > -1 && player.x <= 40) {
+  if (player.x > -1 && player.x <= 150) {
     ctx.beginPath();
-    ctx.fillText("Bed!!!", 10, 89);
+    ctx.fillText("Bed!!!", 10, 160);
     ctx.stroke();
   }
 }
 
 function foodCollision() {
-  if (player.x > 220 && player.x <= 275) {
+  if (player.x > 375 && player.x <= 600) {
     ctx.beginPath();
-    ctx.fillText("Food!!!", 260, 89);
+    ctx.fillText("Food!!!", 500, 160);
     ctx.stroke();
   }
 }
