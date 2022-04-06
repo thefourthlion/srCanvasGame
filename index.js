@@ -405,31 +405,37 @@ const Countries = [
 ];
 
 const player = {
-  w: 25,
-  h: 25,
+  w: 75,
+  h: 75,
   x: Math.floor(Math.random() * 245) + 1,
-  y: 123,
+  y: 280,
   speed: 1,
   dx: 0,
   dy: 0,
 };
 
 const bed = {
-  w: 50,
-  h: 60,
-  x: 5,
-  y: 90,
+  w: 150,
+  h: 180,
+  x: 0,
+  y: 180,
 };
 
 const food = {
-  w: 50,
-  h: 60,
-  x: 245,
-  y: 90,
+  w: 150,
+  h: 180,
+  x: 450,
+  y: 180,
 };
 
 const canvas = document.getElementById("Canvas");
 const ctx = canvas.getContext("2d");
+
+window.addEventListener('load', function(){
+canvas.width = 600;
+canvas.height = 360;
+});
+
 w = 600;
 h = 360;
 const playerImage = document.querySelector(".player");
@@ -726,9 +732,10 @@ function loadEverything() {
     //   }
     // }
     let time = currentHour + ":" + currentMinute + ":" + currentSecond;
-    ctx.fillText(time, canvas.width / 2 - 15, 10);
+    ctx.font = "20px Verdana";
+    ctx.fillText(time, canvas.width / 2 - 15, 25);
     // for testing
-    ctx.fillText("player x: " + player.x, 10, 10);
+    ctx.fillText("player x: " + player.x, 10, 25);
   }
 
   // drawScene();
@@ -796,17 +803,17 @@ function sleepBtn() {
 
 // collision detection
 function bedCollision() {
-  if (player.x > -1 && player.x <= 40) {
+  if (player.x > -1 && player.x <= 150) {
     ctx.beginPath();
-    ctx.fillText("Bed!!!", 10, 89);
+    ctx.fillText("Bed!!!", 10, 160);
     ctx.stroke();
   }
 }
 
 function foodCollision() {
-  if (player.x > 220 && player.x <= 275) {
+  if (player.x > 375 && player.x <= 600) {
     ctx.beginPath();
-    ctx.fillText("Food!!!", 260, 89);
+    ctx.fillText("Food!!!", 500, 160);
     ctx.stroke();
   }
 }
