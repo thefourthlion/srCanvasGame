@@ -430,12 +430,8 @@ const food = {
 
 const canvas = document.getElementById("Canvas");
 const ctx = canvas.getContext("2d");
-
-window.addEventListener('load', function(){
 canvas.width = 600;
 canvas.height = 360;
-});
-
 w = 600;
 h = 360;
 const playerImage = document.querySelector(".player");
