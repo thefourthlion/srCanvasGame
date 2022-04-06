@@ -414,7 +414,8 @@ h = 360;
 const playerImage = document.querySelector(".player");
 const bedImage = document.querySelector(".bed");
 const foodImage = document.querySelector(".food");
-let nftName = "Sydney";
+const foodToEatImage = document.querySelector(".foodToEat");
+let nftName = "Yellowknife";
 let weatherCalled = false;
 let snows;
 let rains;
@@ -425,8 +426,14 @@ let dayTime = false;
 let morning = false;
 let evening = false;
 let nightTime = false;
+let foodClicked = false;
 
 //OBJECTS
+const mouse = {
+x: 0,
+y: 0,
+};
+
 const player = {
   w: 178,
   h: 196,
@@ -451,6 +458,13 @@ const food = {
   y: 220,
 };
 
+let foodToEat = {
+  w: 76,
+  h: 66,
+  x: 495,
+  y: 195,
+}
+
 //DRAW FUNCTIONS
 function drawPlayer() {
   ctx.drawImage(playerImage, player.x, player.y, player.w, player.h);
@@ -462,6 +476,10 @@ function drawBed() {
 
 function drawFood() {
   ctx.drawImage(foodImage, food.x, food.y, food.w, food.h);
+}
+
+function drawFoodToEat() {
+  ctx.drawImage(foodToEatImage, foodToEat.x, foodToEat.y, foodToEat.w, foodToEat.h);
 }
 
 //OPERATIONS
@@ -835,6 +853,7 @@ function defaultSky() {
   drawBed();
   drawFood();
   drawPlayer();
+  drawFoodToEat();
 
   newPos();
   bedCollision();
@@ -945,8 +964,56 @@ document.addEventListener("click", (event) => {
     }
   }
   hungryClicked();
+
+
+
 });
 loadEverything();
+
+document.addEventListener("mousedown", (event) => {
+  let bound = canvas.getBoundingClientRect();
+  let x = event.clientX - bound.left - canvas.clientLeft;
+  let y = event.clientY - bound.top - canvas.clientTop;
+    //move food with mouse when clicked
+    if (x > 489 && x < 571 && y > 194 && y < 257) {
+      document.addEventListener("mousemove", function(event) {
+        let bound = canvas.getBoundingClientRect();
+        foodToEat.x = (event.clientX - bound.left - canvas.clientLeft) - foodToEat.w/2;
+        foodToEat.y = (event.clientY - bound.top - canvas.clientTop) - foodToEat.h/2;
+        foodClicked = true;
+       });
+    }
+});
+
+document.addEventListener("mouseup", (event) => {
+  let bound = canvas.getBoundingClientRect();
+  let x = event.clientX - bound.left - canvas.clientLeft;
+  let y = event.clientY - bound.top - canvas.clientTop;
+
+    //put food back on table
+    if (x > 409 && x < 591 && y > 234 && y < 282 && foodClicked === true) {
+      document.addEventListener("mousemove", function(event) {
+        foodToEat.x = 495;
+        foodToEat.y = 195;
+        foodClicked = false;
+       });
+    }
+
+        if (foodClicked === true && 
+      foodToEat.x - (player.x + player.w) <= -50 && 
+      foodToEat.x - (player.x + player.w) >= -200 &&
+      foodToEat.y - (player.y + player.h) <= 5 &&
+      foodToEat.y - (player.y + player.h) >= -225
+      ) {
+        document.addEventListener("mousemove", function(event) {
+          foodToEat.x = 495;
+          foodToEat.y = 195;
+          foodClicked = false;
+         });
+      console.log("on rabbit!");
+    }
+});
+
 
 document.addEventListener("keydown", keyDown);
 document.addEventListener("keyup", keyUp);
