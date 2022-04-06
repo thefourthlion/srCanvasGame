@@ -415,7 +415,9 @@ const playerImage = document.querySelector(".player");
 const bedImage = document.querySelector(".bed");
 const foodImage = document.querySelector(".food");
 const foodToEatImage = document.querySelector(".foodToEat");
-let nftName = "Yellowknife";
+const floorImage = document.querySelector(".floor");
+const wallImage = document.querySelector(".wall");
+let nftName = "Los Angeles";
 let weatherCalled = false;
 let snows;
 let rains;
@@ -451,6 +453,20 @@ const bed = {
   y: 220,
 };
 
+const floor = {
+  w: 600,
+  h: 89,
+  x: 0,
+  y: 271,
+};
+
+const wall = {
+  w: 600,
+  h: 289,
+  x: 0,
+  y: -10,
+};
+
 const food = {
   w: 187,
   h: 125,
@@ -482,6 +498,14 @@ function drawFoodToEat() {
   ctx.drawImage(foodToEatImage, foodToEat.x, foodToEat.y, foodToEat.w, foodToEat.h);
 }
 
+function drawFloor() {
+  ctx.drawImage(floorImage, floor.x, floor.y, floor.w, floor.h);
+}
+
+function drawWall() {
+  ctx.drawImage(wallImage, wall.x, wall.y, wall.w, wall.h);
+}
+
 //OPERATIONS
 const index = Countries.findIndex((object) => {
   return object.name === nftName;
@@ -495,8 +519,8 @@ const ranNums = {
 
     //clear function
 function clear() {
-  ctx.clearRect(0, 80, 300, 70);
-  ctx.clearRect(0, 0, 300, 15);
+  // ctx.clearRect(0, 80, 300, 70);
+  // ctx.clearRect(0, 0, 300, 15);
   ctx.clearRect(0, 0, 600, 360);
   ctx.beginPath();
   ctx.stroke();
@@ -669,15 +693,15 @@ function weather() {
     chance > rainChance + Countries[index].snow
   ) {
     console.log("Sunny");
-    console.log(
-      chance +
-        " > " +
-        rainChance +
-        " && " +
-        chance +
-        " > " +
-        (rainChance + Countries[index].snow)
-    );
+    // console.log(
+    //   chance +
+    //     " > " +
+    //     rainChance +
+    //     " && " +
+    //     chance +
+    //     " > " +
+    //     (rainChance + Countries[index].snow)
+    // );
     sunny = true;
     snowing = false;
     raining = false;
@@ -705,17 +729,7 @@ weather();
 function loadEverything() {
   function time() {
     let date = new Date();
-    let utcHours = date.getUTCHours();
-    let currentHour = date.getUTCHours() + Countries[index].time;
-
-    //without adding 24 hours to the hour it shows negatives after 24
-    let displayHour = currentHour;
-    // if (utcHours >= 1 && utcHours <= 12 && Countries[index].time < 0) {
-    //   displayHour = currentHour;
-    // } else if (utcHours <= 1 && utcHours >= 12 && Countries[index].time < 0) {
-    //   displayHour = currentHour;
-    // }
-    
+    let currentHour = date.getUTCHours() + Countries[index].time; 
     let currentMinute = 0;
     let currentSecond = date.getUTCSeconds();
     let milliseconds = date.getUTCMilliseconds();
@@ -729,13 +743,7 @@ function loadEverything() {
     }
 
     //set daytime variable
-    // if (currentHour < 19 && currentHour > 7) {
-    //   dayTime = true;
-    // } else {
-    //   dayTime = false;
-    // }
-
-    if (currentHour > 6 && currentHour < 8) {
+    if (currentHour >= 6 && currentHour < 8 && currentMinute < 15) {
       morning = true;
       dayTime = false;
       evening = false;
@@ -757,7 +765,7 @@ function loadEverything() {
       nightTime = true;
     }
 
-        //adds a zero to the minute if below 10
+        //adds a zero to the minutes and seconds if below 10
         let time = "";
         if (currentMinute < 10 && currentSecond >= 10) {
           time = currentHour + ":0" + currentMinute + ":" + currentSecond;
@@ -770,7 +778,7 @@ function loadEverything() {
         }
         
         //text color based on day or night time
-        if (dayTime === true) {
+        if (dayTime === true || morning === true) {
           ctx.fillStyle = "black";
         } else {
           ctx.fillStyle = "white";
@@ -799,7 +807,7 @@ function loadEverything() {
 //sky color
 function defaultSky() {
   if (morning === true && raining === true) {
-    canvas.style.background = "linear-gradient(#9BB9B8, #1F6064)";
+    canvas.style.background = "linear-gradient(#1F6064, #E8AE56)";
   } else if (dayTime === true && raining === true) {
     canvas.style.background = "linear-gradient(#9BB9B8, #3F8F93)";
   } else if (evening === true && raining === true) {
@@ -817,7 +825,7 @@ function defaultSky() {
     canvas.style.background = "linear-gradient(#0D0627, #000000)";
   } 
   else if (morning === true && sunny === true) {
-    canvas.style.background = "linear-gradient(#D3FFFF, #E8AE56)";
+    canvas.style.background = "linear-gradient(#31C4BF, #E8AE56)";
   } else if (dayTime === true && sunny === true) {
     canvas.style.background = "linear-gradient(#D3FFFF, #56E7E7)";
   } else if (evening === true && sunny === true) {
@@ -827,21 +835,6 @@ function defaultSky() {
   } 
 }
 
-// function defaultSky() {
-//   if (dayTime === true && raining === true) {
-//     canvas.style.background = "linear-gradient(#9BB9B8, #1F6064)";
-//   } else if (dayTime === false && raining === true) {
-//     canvas.style.background = "linear-gradient(#0D0627, #000000)";
-//   } else if (dayTime === true && snowing === true) {
-//     canvas.style.background = "linear-gradient(#CCFFFD, #31C4BF)";
-//   } else if (dayTime === false && snowing === true) {
-//     canvas.style.background = "linear-gradient(#0D0627, #000000)";
-//   } else if (dayTime === true && sunny === true) {
-//     canvas.style.background = "linear-gradient(#D3FFFF, #56E7E7)";
-//   } else if (dayTime === false && sunny === true) {
-//     canvas.style.background = "linear-gradient(#0D0627, #000000)";
-//   }
-// }
   defaultSky();
 
   // drawScene();
@@ -850,10 +843,12 @@ function defaultSky() {
   clear();
   time();
 
+  //drawWall();
+  drawFloor();
   drawBed();
   drawFood();
-  drawPlayer();
   drawFoodToEat();
+  drawPlayer();
 
   newPos();
   bedCollision();
@@ -892,18 +887,20 @@ function sleepBtn() {
 
 // collision detection
 function bedCollision() {
-  if (player.x > -1 && player.x <= 194) {
-    ctx.beginPath();
-    ctx.fillText("Bed!!!", 10, 160);
-    ctx.stroke();
+  if (player.x > -1 && player.x <= 150) {
+    // ctx.beginPath();
+    // ctx.fillText("Bed!!!", 10, 160);
+    // ctx.stroke();
+    console.log("Bed Collision Detected.");
   }
 }
 
 function foodCollision() {
-  if (player.x > 413 - player.w && player.x <= 600) {
-    ctx.beginPath();
-    ctx.fillText("Food!!!", 500, 160);
-    ctx.stroke();
+  if (player.x > 475 - player.w && player.x <= 600) {
+    // ctx.beginPath();
+    // ctx.fillText("Food!!!", 500, 160);
+    // ctx.stroke();
+    console.log("Table Collision Detected.");
   }
 }
 
@@ -952,7 +949,7 @@ document.addEventListener("click", (event) => {
   let x = event.clientX - bound.left - canvas.clientLeft;
   let y = event.clientY - bound.top - canvas.clientTop;
   //fill with functions for positional clicks
-  console.log("got clicked X:" + x + " Y:" + y);
+  console.log("clicked X:" + x + " Y:" + y);
   // clickable positions
   function hungryClicked() {
     if (y >= 31 && y < 68 && x > 40 && x < 155) {
