@@ -1,6 +1,8 @@
 * {
   margin: 0;
   padding: 0;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
 * body {
@@ -8,20 +10,17 @@
 }
 
 * #Canvas {
-  width: 600px;
-  height: 360px;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
   margin: 0px auto 0 auto;
-  border: 5px solid black;
-  background-color: lightseagreen;
+  background: #a7f0ee;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  max-width: 100%;
+  max-height: 100%;
+  -webkit-transition: background 5s;
+  transition: background 5s;
 }
 
 * img {
