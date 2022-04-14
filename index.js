@@ -442,20 +442,22 @@ window.addEventListener("load", function () {
   let facingLeft;
   let facingRight;
   //*variable below must be set
+  let sleepInterval = Math.floor(Math.random() * 10000) + 10000;
+  let isSleepTime = false;
   let lastTime = 0;
   let weatherTimer = 0;
   let weatherInterval = 60000;
+  let sleepTimer = 0;
+  let eatTimer = 0;
+  let eatInterval = 60000;
   let deltaTime = 0;
 
   //# OPERATIONS
   const index = Countries.findIndex((object) => {
     return object.name == nftName;
   });
-
-  const ranNums = {
-    eat: Math.floor(Math.random() * 60) + 1,
-    sleep: Math.floor(Math.random() * 60) + 1,
-  };
+  let randomEat = Math.floor(Math.random() * 60) + 1;
+  let randomSleep = Math.floor(Math.random() * 60) + 1;
 
   //TODO left and right movement with touch actions
   //# CLASSES
@@ -479,7 +481,7 @@ window.addEventListener("load", function () {
         ) {
           this.keys.push(event.code);
         }
-        console.log(this.keys);
+        // console.log(this.keys);
       });
       window.addEventListener("keyup", (event) => {
         if (
@@ -494,7 +496,7 @@ window.addEventListener("load", function () {
         ) {
           this.keys.splice(this.keys.indexOf(event.code), 1);
         }
-        console.log(this.keys);
+        // console.log(this.keys);
       });
 
       // mobile inputs
@@ -503,14 +505,14 @@ window.addEventListener("load", function () {
         this.touchY = event.changedTouches[0].pageY;
         // console.log(event);
         if (event.changedTouches[0].pageX < window.innerWidth / 3) {
-          console.log("left");
+          // console.log("left");
           this.keys.push("tap left");
         } else if (
           event.changedTouches[0].pageX >=
           (window.innerWidth / 3) * 2
         ) {
           this.keys.push("tap right");
-          console.log("right");
+          // console.log("right");
         }
       });
       //*handles touch inputs
@@ -911,7 +913,66 @@ window.addEventListener("load", function () {
     }
   }
 
+  class SleepButton {
+    constructor() {
+      this.x = 100;
+      this.y = 10;
+      this.height = 50;
+      this.width = 200;
+      this.image = document.querySelector(".sleepBtn");
+    }
+    draw(canvas) {
+      if (isSleepTime == true) {
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "black";
+        // console.log("sleep time");
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+
+        // ctx.rect(this.x, this.y, this.width, this.height);
+        // ctx.fill();
+      }
+    }
+  }
+
   //# FUNCTIONS
+
+  function handleSleepTime() {
+    // sleepInterval = Math.floor(Math.random() * 360000) + 360000;
+    sleepInterval = Math.floor(Math.random() * 5000) + 1000;
+    console.log("time to sleep");
+    isSleepTime = true;
+  }
+
+  function handleSleep() {
+    if (isSleepTime == true && player.x < bed.x + bed.width) {
+      console.log("bed collision when tired");
+    }
+  }
+
+  function handleSleepClick(event) {
+    const ctx = canvas.getContext("2d");
+
+    let bound = canvas.getBoundingClientRect();
+    let x = event.clientX - bound.left - canvas.clientLeft;
+    let y = event.clientY - bound.top - canvas.clientTop;
+    if (
+      bedCollided &&
+      isSleepTime &&
+      x < sleepButton.x + sleepButton.width &&
+      x > sleepButton.x &&
+      y > sleepButton.y &&
+      y < sleepButton.y + sleepButton.height
+    ) {
+      console.log("sleep button clicked");
+      isSleepTime = false;
+      ctx.clearRect(
+        sleepButton.x,
+        sleepButton.y,
+        sleepButton.width,
+        sleepButton.height
+      );
+    }
+  }
   function time() {
     date = new Date();
     currentHour = date.getUTCHours() + Countries[index].time;
@@ -1073,7 +1134,7 @@ window.addEventListener("load", function () {
   //*handle collisions with the bed and table
   function handleCollisions() {
     //*bed collision
-    if (player.x <= bed.x + bed.width - 65) {
+    if (player.x <= bed.x + bed.width) {
       bedCollided = true;
       // console.log("Bed collided.");
     } else {
@@ -1092,9 +1153,11 @@ window.addEventListener("load", function () {
   //# EVENT LISTENERS
   document.addEventListener("click", (event) => {
     handleClick(event);
+    handleSleepClick(event);
   });
 
   //# INITIALIZE CLASS OBJECTS
+  const sleepButton = new SleepButton();
   const input = new InputHandler();
   const player = new Player();
   const bed = new Bed();
@@ -1135,6 +1198,16 @@ window.addEventListener("load", function () {
     time();
     handleCollisions();
 
+    // eat and sleep
+    if (sleepTimer > sleepInterval) {
+      handleSleepTime();
+      sleepTimer = 0;
+    } else {
+      sleepTimer += deltaTime;
+    }
+
+    handleSleep();
+
     //*call weather function when the weatherInterval has passed
     if (weatherTimer > weatherInterval) {
       weather();
@@ -1153,6 +1226,8 @@ window.addEventListener("load", function () {
     player.draw(ctx);
     clock.draw(ctx);
     player.update(input, deltaTime);
+
+    sleepButton.draw(canvas);
 
     requestAnimationFrame(animate);
   }
