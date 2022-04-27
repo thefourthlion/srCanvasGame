@@ -413,16 +413,16 @@ window.addEventListener("load", function () {
     },
   ];
 
-  //SET LOCATION
+  //*SET LOCATION
   let nftName = "Berlin";
 
-  // CANVAS
+  //# CANVAS
   const canvas = document.getElementById("Canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = 1000;
   canvas.height = 600;
 
-  // VARIABLES
+  //# VARIABLES
   let currentHour;
   let currentMinute;
   let currentSecond;
@@ -443,11 +443,14 @@ window.addEventListener("load", function () {
   let facingRight;
   let foodHovered = false;
   let petCount = 0;
+  let foodClickedX;
+  let foodClickedY;
   // karma being 1-10, 1 being mad/sad, 10 being happy, start at normal
   let karma = 5;
   let foodImage = document.querySelector(".foodToEat");
 
-  //variable below must be set
+  //*variable below must be set
+  let sleeping = false;
   let sleepInterval = Math.floor(Math.random() * 10000) + 10000;
   let isSleepTime = false;
   let lastTime = 0;
@@ -458,21 +461,22 @@ window.addEventListener("load", function () {
   let eatInterval = 60000;
   let deltaTime = 0;
 
-  // OPERATIONS
+  //# OPERATIONS
   const index = Countries.findIndex((object) => {
     return object.name == nftName;
   });
+
   let randomEat = Math.floor(Math.random() * 60) + 1;
   let randomSleep = Math.floor(Math.random() * 60) + 1;
 
   //TODO left and right movement with touch actions
-  // CLASSES
+  //# CLASSES
   class InputHandler {
     constructor() {
       this.keys = [];
       this.touchY = "";
       this.touchThreshold = 80;
-      //handles keyboard inputs
+      //*handles keyboard inputs
       window.addEventListener("keydown", (event) => {
         if (
           (event.code == "ArrowDown" ||
@@ -487,7 +491,6 @@ window.addEventListener("load", function () {
         ) {
           this.keys.push(event.code);
         }
-        // console.log(this.keys);
       });
       window.addEventListener("keyup", (event) => {
         if (
@@ -505,8 +508,7 @@ window.addEventListener("load", function () {
         // console.log(this.keys);
       });
 
-      // mobile inputs
-
+      //*mobile inputs
       window.addEventListener("touchstart", (event) => {
         this.touchY = event.changedTouches[0].pageY;
         // console.log(event);
@@ -521,7 +523,6 @@ window.addEventListener("load", function () {
           // console.log("right");
         }
       });
-      //handles touch inputs
       window.addEventListener("touchmove", (event) => {
         const swipeDistance = event.changedTouches[0].pageY - this.touchY;
         if (
@@ -554,8 +555,8 @@ window.addEventListener("load", function () {
       this.image = document.querySelector(".player");
       this.speed = 0;
       this.vy = 0;
-      this.weight = 0.12;
-      // where on sprite sheet to start
+      this.weight = 0.08;
+      //*where on sprite sheet to start
       this.frameX = 7;
       this.frameY = 0;
       this.maxFrame = 20;
@@ -595,7 +596,7 @@ window.addEventListener("load", function () {
         this.speed = 1.75;
         facingRight = true;
         facingLeft = false;
-        //sprite sheet cycle move right
+        //*sprite sheet cycle move right
         if (this.frameTimer > this.frameInterval) {
           if (this.frameX >= this.maxFrame) this.frameX = 0;
           else {
@@ -624,7 +625,7 @@ window.addEventListener("load", function () {
         this.speed = -1.75;
         facingRight = false;
         facingLeft = true;
-        //sprite sheet cycle move left
+        //*sprite sheet cycle move left
         if (this.frameTimer > this.frameInterval) {
           if (this.frameX >= this.maxFrame) this.frameX = 0;
           else {
@@ -646,7 +647,7 @@ window.addEventListener("load", function () {
         }
       } else {
         this.speed = 0;
-        //facing left idle
+        //*facing left idle
         if (facingLeft == true) {
           if (this.frameTimer > this.frameInterval) {
             if (this.frameX >= this.maxFrame) this.frameX = 0;
@@ -659,7 +660,7 @@ window.addEventListener("load", function () {
             this.frameTimer += deltaTime;
           }
         }
-        //facing right idle
+        //*facing right idle
         else {
           if (this.frameTimer > this.frameInterval) {
             if (this.frameX >= this.maxFrame) this.frameX = 0;
@@ -674,12 +675,12 @@ window.addEventListener("load", function () {
         }
       }
 
-      //horizontal movement
+      //*horizontal movement
       this.x += this.speed;
       if (this.x < 0) this.x = 0;
       else if (this.x > canvas.width - this.width)
         this.x = canvas.width - this.width;
-      //vertical movement
+      //*vertical movement
       this.y += this.vy;
       if (!this.onGround()) {
         this.vy += this.weight;
@@ -702,9 +703,40 @@ window.addEventListener("load", function () {
       this.x = 0;
       this.y = canvas.height - this.height - 25;
       this.image = document.querySelector(".bed");
+      //*where on sprite sheet to start
+      this.frameX = 0;
+      this.frameY = 0;
+      this.maxFrame = 20;
+      this.fps = 40;
+      this.frameTimer = 0;
+      this.frameInterval = 1000 / this.fps;
     }
     draw(context) {
-      context.drawImage(this.image, this.x, this.y, this.width, this.height);
+      if (sleeping) {
+        context.drawImage(
+          this.image,
+          1 * this.width,
+          this.frameY * this.height,
+          this.width,
+          this.height,
+          this.x,
+          this.y,
+          this.width,
+          this.height
+        );
+      } else {
+        context.drawImage(
+          this.image,
+          0 * this.width,
+          this.frameY * this.height,
+          this.width,
+          this.height,
+          this.x,
+          this.y,
+          this.width,
+          this.height
+        );
+      }
     }
   }
 
@@ -721,6 +753,25 @@ window.addEventListener("load", function () {
     }
   }
 
+  class FoodClicked {
+    constructor() {
+      this.width = 106;
+      this.height = 93;
+      this.x = foodClickedX;
+      this.y = foodClickedY;
+      this.image = document.querySelector(".foodClicked");
+    }
+    draw(context) {
+      context.drawImage(
+        this.image,
+        foodClickedX,
+        foodClickedY,
+        this.width,
+        this.height
+      );
+    }
+  }
+
   class Food {
     constructor() {
       this.width = 106;
@@ -728,9 +779,42 @@ window.addEventListener("load", function () {
       this.x = canvas.width - this.width - 40;
       this.y = canvas.height - this.height - 163;
       this.image = document.querySelector(".foodToEat");
+      //*where on sprite sheet to start
+      this.frameX = 0;
+      this.frameY = 0;
+      this.maxFrame = 3;
+      this.fps = 3;
+      this.frameTimer = 0;
+      this.frameInterval = 10000 / this.fps;
     }
     draw(context) {
-      context.drawImage(this.image, this.x, this.y, this.width, this.height);
+      context.drawImage(
+        this.image,
+        this.frameX * this.width,
+        this.frameY * this.height,
+        this.width,
+        this.height,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
+    }
+    update(deltaTime) {
+      if (this.frameTimer > this.frameInterval) {
+        // if (this.frameX >= this.maxFrame) this.frameX = 0;
+        // else {
+        if (this.frameX == 3) {
+          this.frameX = 3;
+        } else {
+          this.frameX++;
+          this.frameY = 0;
+        }
+
+        this.frameTimer = 0;
+      } else {
+        this.frameTimer += deltaTime;
+      }
     }
   }
 
@@ -782,7 +866,7 @@ window.addEventListener("load", function () {
       this.image = document.querySelector(".clock");
     }
     draw(context) {
-      //adds a zero to the minutes, seconds, and hour if below 10
+      //*adds a zero to the minutes, seconds, and hour if below 10
       if (currentMinute < 10 && currentSecond >= 10 && currentHour >= 10) {
         currentTime = currentHour + ":0" + currentMinute + ":" + currentSecond;
       } else if (
@@ -921,59 +1005,55 @@ window.addEventListener("load", function () {
 
   class SleepButton {
     constructor() {
-      this.x = 100;
-      this.y = 10;
+      this.x = 20;
+      this.y = 100;
       this.height = 50;
       this.width = 200;
       this.image = document.querySelector(".sleepBtn");
     }
     draw(canvas) {
-      if (isSleepTime == true) {
+      if (isSleepTime == true && bedCollided) {
         const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "black";
         // console.log("sleep time");
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-
-        // ctx.rect(this.x, this.y, this.width, this.height);
-        // ctx.fill();
       }
     }
   }
 
-  // FUNCTIONS
-
-  function handleSleepTime() {
-    // sleepInterval = Math.floor(Math.random() * 360000) + 360000;
-    sleepInterval = Math.floor(Math.random() * 5000) + 1000;
-    console.log("time to sleep");
-    isSleepTime = true;
-  }
-
-  function handleSleepClick(event) {
-    const ctx = canvas.getContext("2d");
-
-    let bound = canvas.getBoundingClientRect();
-    let x = event.clientX - bound.left - canvas.clientLeft;
-    let y = event.clientY - bound.top - canvas.clientTop;
-    if (
-      bedCollided &&
-      isSleepTime &&
-      x < sleepButton.x + sleepButton.width &&
-      x > sleepButton.x &&
-      y > sleepButton.y &&
-      y < sleepButton.y + sleepButton.height
-    ) {
-      console.log("sleep button clicked");
-      isSleepTime = false;
-      ctx.clearRect(
-        sleepButton.x,
-        sleepButton.y,
-        sleepButton.width,
-        sleepButton.height
-      );
+  class WakeButton {
+    constructor() {
+      const ctx = canvas.getContext("2d");
+      this.x = 20;
+      this.y = 300;
+      this.height = 50;
+      this.width = 200;
+      this.image = document.querySelector(".sleepBtn");
+    }
+    draw(canvas) {
+      if (sleeping) {
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+      }
     }
   }
 
+  class SleepIcon {
+    constructor() {
+      this.x = 20;
+      this.y = 20;
+      this.height = 50;
+      this.width = 50;
+      this.image = document.querySelector(".sleepIcon");
+    }
+    draw(canvas) {
+      if (isSleepTime == true) {
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+      }
+    }
+  }
+
+  //# FUNCTIONS
   function time() {
     date = new Date();
     currentHour = date.getUTCHours() + Countries[index].time;
@@ -983,35 +1063,34 @@ window.addEventListener("load", function () {
     currentMonth = date.getMonth();
     let adjustedMinute;
 
-    // handle time for countries that are 30 minutes ahead
+    //*handle time for countries that are 30 minutes ahead
     if (
       Countries[index].name == "Tehran" ||
       Countries[index].name == "Mumbai"
     ) {
       adjustedMinute = date.getUTCMinutes() + Countries[index].minute;
-      //stops minutes from going over 60
+      //*stops minutes from going over 60
       if (adjustedMinute >= 61) {
         currentMinute = adjustedMinute - 60;
       } else {
         currentMinute = adjustedMinute;
       }
     }
-
-    //countries that do not need 30 minutes added
+    //*countries that do not need 30 minutes added
     else {
       currentMinute = date.getUTCMinutes();
     }
-    //make sure time doesn't go above 24 hours of the day
+    //*make sure time doesn't go above 24 hours of the day
     if (currentHour >= 24) {
       // console.log("time greater than 24");
       currentHour = currentHour - 24;
     }
-    //make sure time doesn't go bellow 1 hours of the day
+    //*make sure time doesn't go bellow 1 hours of the day
     if (currentHour < 1 && currentHour !== 0) {
       // console.log("time less than 1");
       currentHour = currentHour + 24;
     }
-    //set time of day variables
+    //*set time of day variables
     if (currentHour == 6) {
       morning = true;
       dayTime = false;
@@ -1034,26 +1113,34 @@ window.addEventListener("load", function () {
       nightTime = true;
     }
 
+    // handle food reset
+    // if (currentMinute % 1 == 0 && currentSecond == 1) {
+    //   console.log("food reset");
+    //   food.x = canvas.width - food.width - 40;
+    //   food.y = canvas.height - food.height - 163;
+    // }
+
     // reset pets when you want, probably every 3 to 5 minutes
     if (currentMinute % 3 == 0 && currentSecond == 1) {
       petCount = 0;
       console.log("pet count reset");
     }
-
-    // handle food reset
-    if (currentMinute % 1 == 0 && currentSecond == 1) {
-      console.log("food reset");
-      food.x = canvas.width - food.width - 40;
-      food.y = canvas.height - food.height - 163;
-    }
   }
 
-  //determine which type of weather will happen
+  function handleSleepTime() {
+    // sleepInterval = Math.floor(Math.random() * 360000) + 360000;
+    sleepInterval = Math.floor(Math.random() * 10000) + 10000;
+    console.log("time to sleep");
+    isSleepTime = true;
+    sleeping = false;
+  }
+
+  //*determine which type of weather will happen
   function weather() {
     let chance = Math.floor(Math.random() * 365) + 1;
     let rainChance = Countries[index].rain - Countries[index].snow;
 
-    //rain
+    //*rain
     if (chance < rainChance) {
       console.log("Raining");
       handleBackground();
@@ -1061,7 +1148,7 @@ window.addEventListener("load", function () {
       snowing = false;
       sunny = false;
     }
-    //snowing
+    //*snowing
     else if (
       chance > rainChance &&
       chance < rainChance + Countries[index].snow
@@ -1072,12 +1159,12 @@ window.addEventListener("load", function () {
       sunny = false;
       raining = false;
     }
-    //sunny/clear
+    //*sunny/clear
     else if (
       chance > rainChance &&
       chance > rainChance + Countries[index].snow
     ) {
-      // console.log("Sunny");
+      console.log("Sunny");
       sunny = true;
       snowing = false;
       raining = false;
@@ -1086,9 +1173,9 @@ window.addEventListener("load", function () {
 
   //TODO bg color transition happens on page load
   //TODO would be nice to have rain/snow/stars transition in and out when called
-  //draw everything outside the window including rain and snow
+  //*draw everything outside the window including rain and snow
   function handleBackground() {
-    //draw sky gradient
+    //*draw sky gradient
     if (morning == true && raining == true) {
       canvas.style.background = "#6B859E";
     } else if (dayTime == true && raining == true) {
@@ -1115,16 +1202,16 @@ window.addEventListener("load", function () {
       canvas.style.background = "#0D0627";
     }
 
-    //draw stars
+    //*draw stars
     if (nightTime == true) {
       star.draw(canvas);
       star.update();
     }
 
-    //draw scenery
+    //*draw scenery
     scenery.draw(ctx);
 
-    //draw and update rain and snow
+    //*draw and update rain and snow
     if (raining == true) {
       for (let i = 0; i < rainArray.length; i++) {
         rainArray[i].update();
@@ -1135,6 +1222,71 @@ window.addEventListener("load", function () {
         snowArray[i].update();
         snowArray[i].draw(canvas);
       }
+    }
+  }
+
+  //*handle click event
+  function handleClick(event) {
+    let bound = canvas.getBoundingClientRect();
+    let x = event.clientX - bound.left - canvas.clientLeft;
+    let y = event.clientY - bound.top - canvas.clientTop;
+    console.log("clicked X:" + x + " Y:" + y);
+  }
+
+  function handleSleepClick(event) {
+    const ctx = canvas.getContext("2d");
+    let bound = canvas.getBoundingClientRect();
+    let x = event.clientX - bound.left - canvas.clientLeft;
+    let y = event.clientY - bound.top - canvas.clientTop;
+    if (
+      bedCollided &&
+      isSleepTime &&
+      x < sleepButton.x + sleepButton.width &&
+      x > sleepButton.x &&
+      y > sleepButton.y &&
+      y < sleepButton.y + sleepButton.height
+    ) {
+      console.log("sleep button clicked");
+      sleeping = true;
+      isSleepTime = false;
+    }
+  }
+
+  function handleWakeClick(event) {
+    const ctx = canvas.getContext("2d");
+    let bound = canvas.getBoundingClientRect();
+    let x = event.clientX - bound.left - canvas.clientLeft;
+    let y = event.clientY - bound.top - canvas.clientTop;
+    if (
+      sleeping &&
+      x < wakeButton.x + wakeButton.width &&
+      x > wakeButton.x &&
+      y > wakeButton.y &&
+      y < wakeButton.y + wakeButton.height
+    ) {
+      console.log("wake button clicked");
+      sleeping = false;
+      isSleepTime = false;
+      sleepTimer = 0;
+    }
+  }
+
+  //*handle collisions with the bed and table
+  function handleCollisions() {
+    //*bed collision
+    if (player.x <= bed.x + bed.width) {
+      bedCollided = true;
+      // console.log("Bed collided.");
+    } else {
+      bedCollided = false;
+    }
+
+    //*table collision
+    if (player.x >= table.x - player.width + 100) {
+      tableCollided = true;
+      // console.log("Table collided.");
+    } else {
+      tableCollided = false;
     }
   }
 
@@ -1158,60 +1310,23 @@ window.addEventListener("load", function () {
     }
   }
 
-  function handleClick(event) {
-    let bound = canvas.getBoundingClientRect();
-    let x = event.clientX - bound.left - canvas.clientLeft;
-    let y = event.clientY - bound.top - canvas.clientTop;
-    console.log("clicked X:" + x + " Y:" + y);
-  }
-
-  //handle collisions with the bed and table
-  function handleCollisions() {
-    //bed collision
-    if (player.x <= bed.x + bed.width - 200) {
-      bedCollided = true;
-      // console.log("Bed collided.");
-    } else {
-      bedCollided = false;
-    }
-
-    //table collision
-    if (player.x >= table.x - player.width + 100) {
-      tableCollided = true;
-      // console.log("Table collided.");
-    } else {
-      tableCollided = false;
-    }
-  }
-
   // handle food drag event
-  function handleFood(event) {
-    let bound = canvas.getBoundingClientRect();
-    let x = event.clientX - bound.left - canvas.clientLeft;
-    let y = event.clientY - bound.top - canvas.clientTop;
-    if (foodHovered == true) {
-      if (
-        food.x > player.x &&
-        food.x < player.x + player.width &&
-        food.y > player.y &&
-        food.y < player.y + player.height
-      ) {
-        // makes food disappear
-        food.x = -100;
-        food.y = -100;
-        foodHovered = false;
-      } else {
-        if (food.x > x) {
-          food.x -= 2.5;
-        } else {
-          food.x += 2.5;
-        }
-        if (food.y > y) {
-          food.y -= 2.5;
-        } else {
-          food.y += 2.5;
-        }
-      }
+  function handleFood() {
+    // let bound = canvas.getBoundingClientRect();
+    // let x = event.clientX - bound.left - canvas.clientLeft;
+    // let y = event.clientY - bound.top - canvas.clientTop;
+    if (
+      foodClickedX > player.x &&
+      foodClickedX < player.x + player.width &&
+      foodClickedY > player.y &&
+      foodClickedY < player.y + player.height
+    ) {
+      // makes food disappear
+      console.log("food colliding with player");
+      // foodClicked.x = -100;
+      // foodClicked.y = -100;
+      food.frameX = 0;
+      foodHovered = false;
     }
   }
 
@@ -1235,23 +1350,28 @@ window.addEventListener("load", function () {
       console.log("set food down");
     }
   }
-  // }
 
-  // EVENT LISTENERS for clicks
+  //# EVENT LISTENERS
   document.addEventListener("click", (event) => {
     handleClick(event);
     handleSleepClick(event);
+    handleWakeClick(event);
     foodClickHandle(event);
     handlePets(event);
   });
 
-  // EVENT LISTENERS for mouse move
   document.addEventListener("mousemove", (event) => {
-    handleFood(event);
+    let bound = canvas.getBoundingClientRect();
+
+    foodClickedX = event.clientX - bound.left - canvas.clientLeft;
+    foodClickedY = event.clientY - bound.top - canvas.clientTop;
   });
 
-  // INITIALIZE CLASS OBJECTS
+  //# INITIALIZE CLASS OBJECTS
+  const foodClicked = new FoodClicked();
+  const sleepIcon = new SleepIcon();
   const sleepButton = new SleepButton();
+  const wakeButton = new WakeButton();
   const input = new InputHandler();
   const player = new Player();
   const bed = new Bed();
@@ -1282,24 +1402,25 @@ window.addEventListener("load", function () {
     };
   }
 
-  // CALL ON LOAD
+  //# CALL ON LOAD
   function animate(timeStamp) {
-    //track time between animation frames
+    //*track time between animation frames
     deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     time();
     handleCollisions();
 
-    // eat and sleep
-    if (sleepTimer > sleepInterval) {
+    //*eat and sleep
+    if (sleepTimer > sleepInterval && !sleeping) {
       handleSleepTime();
       sleepTimer = 0;
     } else {
       sleepTimer += deltaTime;
     }
 
-    //call weather function when the weatherInterval has passed
+    //*call weather function when the weatherInterval has passed
     if (weatherTimer > weatherInterval) {
       weather();
       weatherTimer = 0;
@@ -1307,18 +1428,34 @@ window.addEventListener("load", function () {
       weatherTimer += deltaTime;
     }
 
-    //draw and update all of the visual elements on screen
+    //*draw and update all of the visual elements on screen
     handleBackground();
     wall.draw(ctx);
     floor.draw(ctx);
     bed.draw(ctx);
     table.draw(ctx);
-    food.draw(ctx);
-    player.draw(ctx);
+
+    // if (!foodHovered && food.frameX != 3) {
+    // }
+
+    if (foodHovered && food.frameX == 3) {
+      foodClicked.draw(ctx);
+      handleFood();
+    } else {
+      food.draw(ctx);
+    }
+
+    if (!sleeping) {
+      player.draw(ctx);
+      player.update(input, deltaTime);
+    }
+
+    food.update(deltaTime);
     clock.draw(ctx);
-    player.update(input, deltaTime);
 
     sleepButton.draw(canvas);
+    sleepIcon.draw(canvas);
+    wakeButton.draw(canvas);
 
     requestAnimationFrame(animate);
   }
