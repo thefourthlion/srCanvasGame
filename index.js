@@ -423,6 +423,7 @@ window.addEventListener("load", function () {
   canvas.height = 600;
 
   //# VARIABLES
+  let pooping = false;
   let currentHour;
   let currentMinute;
   let currentSecond;
@@ -461,7 +462,12 @@ window.addEventListener("load", function () {
   let sleepTimer = 0;
   let eatTimer = 0;
   let eatInterval = 60000;
-  let deltaTime = 0;
+  let poopTimer = 0;
+  let poopInterval = 10000;
+  const poopArray = [];
+  let poopCounter = 0;
+  let poopArrayLength = poopArray.length;
+  // let deltaTime = 0;
 
   // drinking variables
   let drinkcount = 0;
@@ -700,6 +706,21 @@ window.addEventListener("load", function () {
     }
     onGround() {
       return this.y >= this.groundHeight;
+    }
+  }
+
+  class Poop {
+    constructor() {
+      this.width = 76;
+      this.height = 77;
+      this.y = canvas.height - this.height - 25;
+      this.x = 0;
+      this.image = document.querySelector(".poop");
+    }
+    draw(context) {
+      if (pooping) {
+        context.drawImage(this.image, this.x, this.y, this.width, this.height);
+      }
     }
   }
 
@@ -1359,6 +1380,46 @@ window.addEventListener("load", function () {
       waterCollided = false;
     }
   }
+  // handle pooping
+  function handlePooping() {
+    poopArrayLength = poopArray.length;
+    if (poopArray.length < 11) {
+      poopInterval = Math.floor(Math.random() * 10000) + 10000;
+      poopArray.push(new Poop());
+      console.log(poopArray);
+      poopArray[poopArrayLength].x = player.x + player.width / 2;
+      poopArray[poopArrayLength].y = poop.y;
+
+      console.log("time to poop");
+      pooping = true;
+      poopCounter++;
+    }
+    // for (let i = poopCounter; i < poopArray.length; i++) {
+    //   poopArray[i].x = player.x + player.width / 2;
+    //   poopArray[i].y = poop.groundHeight;
+    // }
+  }
+
+  // function handlePoopPosition() {
+
+  // }
+
+  function handlePoopClick(event) {
+    for (let i = 0; i < poopArray.length; i++) {
+      let bound = canvas.getBoundingClientRect();
+      let x = event.clientX - bound.left - canvas.clientLeft;
+      let y = event.clientY - bound.top - canvas.clientTop;
+      if (
+        pooping &&
+        x > poopArray[i].x &&
+        x < poopArray[i].x + poopArray[i].width &&
+        y < poopArray[i].y + poopArray[i].height &&
+        y > poopArray[i].y
+      ) {
+        poopArray[i] = poopArray.splice(i - 1, i + 1);
+      }
+    }
+  }
 
   function handleDrinking() {
     // sleepInterval = Math.floor(Math.random() * 360000) + 360000;
@@ -1440,7 +1501,8 @@ window.addEventListener("load", function () {
       y > food.y &&
       x < food.x + food.width &&
       y < food.y + food.height &&
-      foodHovered == false
+      foodHovered == false &&
+      food.frameX == 3
     ) {
       console.log("picked food up");
 
@@ -1454,7 +1516,7 @@ window.addEventListener("load", function () {
   //# EVENT LISTENERS
   document.addEventListener("click", (event) => {
     handleWaterClick(event);
-
+    handlePoopClick(event);
     handleClick(event);
     handleSleepClick(event);
     handleWakeClick(event);
@@ -1472,6 +1534,7 @@ window.addEventListener("load", function () {
   });
 
   //# INITIALIZE CLASS OBJECTS
+  const poop = new Poop();
   const foodClicked = new FoodClicked();
   const waterBottle = new WaterBottle();
   const sleepIcon = new SleepIcon();
@@ -1487,6 +1550,7 @@ window.addEventListener("load", function () {
   const scenery = new Scenery();
   const clock = new Clock();
   const star = new Stars();
+
   const snowArray = [];
   for (let i = 0; i < 100; i++) {
     snowArray.push(new Snowflake());
@@ -1510,7 +1574,7 @@ window.addEventListener("load", function () {
   //# CALL ON LOAD
   function animate(timeStamp) {
     //*track time between animation frames
-    deltaTime = timeStamp - lastTime;
+    const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1535,6 +1599,13 @@ window.addEventListener("load", function () {
       thirstTimer += deltaTime;
     }
 
+    if (poopTimer > poopInterval) {
+      poopTimer = 0;
+      handlePooping();
+    } else {
+      poopTimer += deltaTime;
+    }
+
     //*call weather function when the weatherInterval has passed
     if (weatherTimer > weatherInterval) {
       weather();
@@ -1550,6 +1621,13 @@ window.addEventListener("load", function () {
     bed.draw(ctx);
     table.draw(ctx);
     waterBottle.draw(ctx);
+    // poop.draw(ctx);
+
+    if (poopArray.length != 0) {
+      for (let i = 0; i < poopArray.length; i++) {
+        poopArray[i].draw(ctx);
+      }
+    }
 
     // if (!foodHovered && food.frameX != 3) {
     // }
@@ -1572,6 +1650,8 @@ window.addEventListener("load", function () {
     sleepButton.draw(canvas);
     sleepIcon.draw(canvas);
     wakeButton.draw(canvas);
+
+    // console.log(deltaTime);
 
     requestAnimationFrame(animate);
   }
