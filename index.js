@@ -445,6 +445,8 @@ window.addEventListener("load", function () {
   let petCount = 0;
   let foodClickedX;
   let foodClickedY;
+  let waterCollided = false;
+
   // karma being 1-10, 1 being mad/sad, 10 being happy, start at normal
   let karma = 5;
   let foodImage = document.querySelector(".foodToEat");
@@ -460,6 +462,13 @@ window.addEventListener("load", function () {
   let eatTimer = 0;
   let eatInterval = 60000;
   let deltaTime = 0;
+
+  // drinking variables
+  let drinkcount = 0;
+  let thirsty = false;
+  let thirstInterval = Math.floor(Math.random() * 10000) + 10000;
+  let thirstTimer = 0;
+  let drinking = false;
 
   //# OPERATIONS
   const index = Countries.findIndex((object) => {
@@ -694,6 +703,59 @@ window.addEventListener("load", function () {
     }
   }
 
+  class WaterBottle {
+    constructor() {
+      this.width = 109;
+      this.height = 323;
+      this.groundHeight = canvas.height - this.height - 25;
+      this.x = canvas.width - this.width;
+      this.y = canvas.height - this.height - 50;
+      this.image = document.querySelector(".waterbottle");
+      //*where on sprite sheet to start
+      this.frameX = 0;
+      this.frameY = 0;
+      this.maxFrame = 2;
+      this.fps = 1;
+      this.frameTimer = 0;
+      this.frameInterval = 1000 / this.fps;
+    }
+    draw(context) {
+      context.drawImage(
+        this.image,
+        this.frameX * this.width,
+        this.frameY * this.height,
+        this.width,
+        this.height,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
+    }
+    update(deltaTime) {
+      if (this.frameTimer > this.frameInterval) {
+        if (drinking) {
+          this.frameX++;
+          this.frameY = 1;
+          if (this.frameX == 2) {
+            drinking = false;
+            thirsty = false;
+            sleepTimer = 0;
+          }
+        } else if (!thirsty) {
+          this.frameX = 0;
+          this.frameY = 0;
+        } else if (thirsty) {
+          this.frameX = 1;
+          this.frameY = 0;
+        }
+        this.frameTimer = 0;
+      } else {
+        this.frameTimer += deltaTime;
+      }
+    }
+  }
+
   class Bed {
     constructor() {
       canvas.width = canvas.width;
@@ -757,8 +819,8 @@ window.addEventListener("load", function () {
     constructor() {
       this.width = 106;
       this.height = 93;
-      this.x = foodClickedX;
-      this.y = foodClickedY;
+      this.x = foodClickedX - this.width / 2;
+      this.y = foodClickedY - this.height / 2;
       this.image = document.querySelector(".foodClicked");
     }
     draw(context) {
@@ -776,7 +838,7 @@ window.addEventListener("load", function () {
     constructor() {
       this.width = 106;
       this.height = 93;
-      this.x = canvas.width - this.width - 40;
+      this.x = canvas.width - this.width - 100;
       this.y = canvas.height - this.height - 163;
       this.image = document.querySelector(".foodToEat");
       //*where on sprite sheet to start
@@ -1282,11 +1344,49 @@ window.addEventListener("load", function () {
     }
 
     //*table collision
-    if (player.x >= table.x - player.width + 100) {
+    if (player.x >= table.x - player.width) {
       tableCollided = true;
       // console.log("Table collided.");
     } else {
       tableCollided = false;
+    }
+
+    // water bottle
+    if (player.x >= waterBottle.x - player.width) {
+      waterCollided = true;
+      // console.log("water collided.");
+    } else {
+      waterCollided = false;
+    }
+  }
+
+  function handleDrinking() {
+    // sleepInterval = Math.floor(Math.random() * 360000) + 360000;
+    thirstInterval = Math.floor(Math.random() * 10000) + 10000;
+    console.log("time to drink");
+    thirsty = true;
+  }
+
+  // handle water drink
+  function handleWaterClick(event) {
+    let bound = canvas.getBoundingClientRect();
+    let x = event.clientX - bound.left - canvas.clientLeft;
+    let y = event.clientY - bound.top - canvas.clientTop;
+
+    // check for player collision and click location
+    if (
+      thirsty &&
+      waterCollided &&
+      x > waterBottle.x &&
+      x < waterBottle.x + waterBottle.width &&
+      y < waterBottle.y + waterBottle.height &&
+      y > waterBottle.y
+    ) {
+      drinking = true;
+      thirsty = false;
+      waterBottle.frameX = 0;
+      waterBottle.frameY = 1;
+      console.log("clicked water");
     }
   }
 
@@ -1353,6 +1453,8 @@ window.addEventListener("load", function () {
 
   //# EVENT LISTENERS
   document.addEventListener("click", (event) => {
+    handleWaterClick(event);
+
     handleClick(event);
     handleSleepClick(event);
     handleWakeClick(event);
@@ -1363,12 +1465,15 @@ window.addEventListener("load", function () {
   document.addEventListener("mousemove", (event) => {
     let bound = canvas.getBoundingClientRect();
 
-    foodClickedX = event.clientX - bound.left - canvas.clientLeft;
-    foodClickedY = event.clientY - bound.top - canvas.clientTop;
+    foodClickedX =
+      event.clientX - bound.left - canvas.clientLeft - foodClicked.width / 2;
+    foodClickedY =
+      event.clientY - bound.top - canvas.clientTop - foodClicked.height / 2;
   });
 
   //# INITIALIZE CLASS OBJECTS
   const foodClicked = new FoodClicked();
+  const waterBottle = new WaterBottle();
   const sleepIcon = new SleepIcon();
   const sleepButton = new SleepButton();
   const wakeButton = new WakeButton();
@@ -1420,6 +1525,16 @@ window.addEventListener("load", function () {
       sleepTimer += deltaTime;
     }
 
+    //*drink
+    waterBottle.update(deltaTime);
+
+    if (thirstTimer > thirstInterval && !thirsty) {
+      thirstTimer = 0;
+      handleDrinking();
+    } else {
+      thirstTimer += deltaTime;
+    }
+
     //*call weather function when the weatherInterval has passed
     if (weatherTimer > weatherInterval) {
       weather();
@@ -1434,6 +1549,7 @@ window.addEventListener("load", function () {
     floor.draw(ctx);
     bed.draw(ctx);
     table.draw(ctx);
+    waterBottle.draw(ctx);
 
     // if (!foodHovered && food.frameX != 3) {
     // }
